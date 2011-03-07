@@ -1,0 +1,23 @@
+# clopy
+
+Script that copies image and video files from digital camera memory card to computer.
+I use it with Canon cameras for other types it might need some tuning.
+
+Now I have two cameras now I need to resolve more edge cases so this script 
+is rewrite of pcopy (https://github.com/PetrGlad/pcopy) in Clojure.
+
+## Usage
+
+Not implemented yet.
+FIXME: write
+
+clopy source-folder target-folder
+where
+* source-folder is where camera's memory card is mounted
+* target-folder is root of your archive
+
+## License
+
+Copyright (C) 2010 Petr Gladkikh <PetrGlad@gmail.com>
+
+Distributed under the Eclipse Public License, the same as Clojure.
