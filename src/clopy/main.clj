@@ -12,6 +12,8 @@
   (let [dot-at  (.lastIndexOf file-name ".")]
     [(.substring file-name 0 dot-at) (.substring file-name (inc dot-at))]))
 
+; use exif2 (uses libexif2) tool to parse exif (and maybe rename files too)
+; We might make by-camera folders and use creation time from exif.
 (defn target-file [source-file target-root]
   (let [source-name (.getName source-file)
         file-date-format (java.text.SimpleDateFormat. "yyyy_MM_dd-HH_mm_ss_SSS")
@@ -20,10 +22,10 @@
         [source-base-name source-ext]  (split-ext source-name)]
     (File. target-root (str 
                          (.format section-date-format timestamp) 
-                         "/"
-                         (.format file-date-format timestamp)
+                         "/" (.format file-date-format timestamp)
                          "-" source-base-name
                          "." source-ext))))
+
 
 (defn main [src target]
   (println "Source" (File. src))
@@ -31,7 +33,7 @@
   (let [source-files (filter media-file? (file-seq (File. src)))
         target-files (group-by #(target-file % target) source-files)]
     (println "Target files")
-    (dorun (for [x target-files] (println x)))
-    ))
+    (dorun (for [x target-files] (println x)))))
 
 ; (apply main *command-line-args*)
+
