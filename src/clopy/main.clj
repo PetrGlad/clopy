@@ -1,5 +1,6 @@
 (ns clopy.main
-  (import [java.io File]))
+  (import [java.io File])
+  (require [clojure.java.io :as io]))
 
 ; Suffixes of files to be copied 
 (def file-types #{"jpg" "mov" "thm" "avi" "3gp" "cr2"})
@@ -17,7 +18,7 @@
 (defn target-file [source-file target-root]
   (let [source-name (.getName source-file)
         file-date-format (java.text.SimpleDateFormat. "yyyy_MM_dd-HH_mm_ss_SSS")
-        section-date-format (java.text.SimpleDateFormat. "yyyy_MM_dd")
+        section-date-format (java.text.SimpleDateFormat. "yyyy_MM") ; "yyyy_MM_dd"
         timestamp (.lastModified source-file)
         [source-base-name source-ext]  (split-ext source-name)]
     (File. target-root (str 
@@ -26,14 +27,24 @@
                          "-" source-base-name
                          "." source-ext))))
 
-
 (defn main [src target]
   (println "Source" (File. src))
   (println "Target" (File. target))
   (let [source-files (filter media-file? (file-seq (File. src)))
         target-files (group-by #(target-file % target) source-files)]
-    (println "Target files")
-    (dorun (for [x target-files] (println x)))))
+    (loop [[[target sources] & xs] (seq target-files)] 
+      (let [src (first sources) 
+            trg target
+            p #(.getCanonicalPath %)]
+        (assert (= 1 (count sources)))
+        (if (.exists trg)
+          ; TODO Check that target has later mod time and is file and has same content (use digest?))
+          (println "= " (p src) "->" (p trg))
+          (do
+            (print "C " (p src) "->" (p trg)) (.flush *out*)
+            (-> trg .getParentFile .mkdirs)
+            (io/copy src trg :buffer-size 0x400000))))
+      (if xs (recur xs)))))
 
 ; (apply main *command-line-args*)
 
