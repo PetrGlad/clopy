@@ -36,28 +36,38 @@
     (io/copy src tmp :buffer-size 0x400000)
     (.renameTo tmp trg)))
 
-(defn main [src target]
-  (println "Source" (-> src File. .getCanonicalPath))
-  (println "Target" (-> target File. .getCanonicalPath))
-  (let [source-files (filter media-file? (file-seq (File. src)))
-        target-files (group-by #(target-file % target) source-files)]
+(defn do-copy [srcf trgf]
+  (let [source-files (filter media-file? (file-seq srcf))
+        target-files (group-by #(target-file % trgf) source-files)]
     (loop [[[target sources] & xs] (sort (seq target-files))] 
       (let [src (first sources) 
             trg target
             p #(.getCanonicalPath %)]
         (assert (= 1 (count sources)))
         (if (.exists trg)           
-          ; TODO Check that target has later mod time and is file and has same content (use digest?))
-          (let [length-diff (- (.length trg) (.length src) )]
-            (println (cond 
-                       (< 0 length-diff) "<s  " 
-                       (> 0 length-diff) ">s  "
-                       true "=  ")
-                     (p src) "  " (p trg)))
-          (do
-            (println "C  " (p src) "  " (p trg)) (.flush *out*)
-            (copy-with-tmp src trg)))) 
+            ; TODO Check that target has later mod time and is file and has same content (use digest?))
+            (let [length-diff (- (.length trg) (.length src))]
+              (println (cond 
+                         (< 0 length-diff) "L<  " 
+                         (> 0 length-diff) "L>  "
+                         true "=  ")
+                       (p src) "  " (p trg)))
+            (do
+              (println "C  " (p src) "  " (p trg)) (.flush *out*)
+              (copy-with-tmp src trg)))) 
       (if xs (recur xs)))))
 
-(apply main *command-line-args*)
+(defn copy [src target]
+  (let [srcf (File. src)
+        trgf (File. target)]
+    (println "Source" (.getCanonicalPath srcf))  
+    (println "Target" (.getCanonicalPath trgf))
+    (if (and (.isDirectory srcf) (.canRead srcf))
+      (do-copy srcf trgf)
+      (println "Can not read source."))))
+
+(if (not= 2 (count *command-line-args*))
+  (println "Expected 2 arguments: source_dir target_dir")
+  (apply copy *command-line-args*)) 
+
 
