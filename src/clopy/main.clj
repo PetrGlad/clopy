@@ -27,23 +27,36 @@
                          "-" source-base-name
                          "." source-ext))))
 
+(defn copy-with-tmp
+  "Reduces chances that partially copied file rmains unnoticed."
+  [src trg]  
+  (let [trg-parent (.getParentFile trg)       
+        tmp (File. trg-parent (str (.getName trg) ".copy.tmp"))]
+    (.mkdirs trg-parent)
+    (io/copy src tmp :buffer-size 0x400000)
+    (.renameTo tmp trg)))
+
 (defn main [src target]
   (println "Source" (-> src File. .getCanonicalPath))
   (println "Target" (-> target File. .getCanonicalPath))
   (let [source-files (filter media-file? (file-seq (File. src)))
         target-files (group-by #(target-file % target) source-files)]
-    (loop [[[target sources] & xs] (seq target-files)] 
+    (loop [[[target sources] & xs] (sort (seq target-files))] 
       (let [src (first sources) 
             trg target
             p #(.getCanonicalPath %)]
         (assert (= 1 (count sources)))
-        (if (.exists trg)
+        (if (.exists trg)           
           ; TODO Check that target has later mod time and is file and has same content (use digest?))
-          (println "= " (p src) "->" (p trg))
+          (let [length-diff (- (.length trg) (.length src) )]
+            (println (cond 
+                       (< 0 length-diff) "<s  " 
+                       (> 0 length-diff) ">s  "
+                       true "=  ")
+                     (p src) "  " (p trg)))
           (do
-            (println "C " (p src) "->" (p trg)) (.flush *out*)
-            (-> trg .getParentFile .mkdirs)
-            (io/copy src trg :buffer-size 0x400000))))
+            (println "C  " (p src) "->" (p trg)) (.flush *out*)
+            (copy-with-tmp src trg)))) 
       (if xs (recur xs)))))
 
 (apply main *command-line-args*)
