@@ -28,8 +28,8 @@
                          "." source-ext))))
 
 (defn main [src target]
-  (println "Source" (File. src))
-  (println "Target" (File. target))
+  (println "Source" (-> src File. .getCanonicalPath))
+  (println "Target" (-> target File. .getCanonicalPath))
   (let [source-files (filter media-file? (file-seq (File. src)))
         target-files (group-by #(target-file % target) source-files)]
     (loop [[[target sources] & xs] (seq target-files)] 
@@ -41,10 +41,10 @@
           ; TODO Check that target has later mod time and is file and has same content (use digest?))
           (println "= " (p src) "->" (p trg))
           (do
-            (print "C " (p src) "->" (p trg)) (.flush *out*)
+            (println "C " (p src) "->" (p trg)) (.flush *out*)
             (-> trg .getParentFile .mkdirs)
             (io/copy src trg :buffer-size 0x400000))))
       (if xs (recur xs)))))
 
-; (apply main *command-line-args*)
+(apply main *command-line-args*)
 
