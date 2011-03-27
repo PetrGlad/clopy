@@ -55,7 +55,7 @@
                        true "=  ")
                      (p src) "  " (p trg)))
           (do
-            (println "C  " (p src) "->" (p trg)) (.flush *out*)
+            (println "C  " (p src) "  " (p trg)) (.flush *out*)
             (copy-with-tmp src trg)))) 
       (if xs (recur xs)))))
 
