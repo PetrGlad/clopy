@@ -1,5 +1,6 @@
-(defproject clopy "1.0.0-SNAPSHOT"
-  :description "FIXME: write"
-  :dependencies [[org.clojure/clojure "1.2.0"]
-                 [org.clojure/clojure-contrib "1.2.0"]]
-  :dev-dependencies [[lein-eclipse "1.0.0"]])
+(defproject clopy "0.2.0-SNAPSHOT"
+  :description "Copy media files from camers card to computer."
+  :url "https://github.com/PetrGlad/clopy"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.5.1"]])

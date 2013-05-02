@@ -7,13 +7,16 @@
 
 (defn media-file? [file-name] 
   (let [normalized (-> file-name .getName .toLowerCase)]
-    (some #(.endsWith normalized %) file-types)))
+    (or 
+      (some #(.endsWith normalized %) file-types)
+      ; Magic lantern generated scripts
+      (re-matches #"hdr_\d+\.sh" normalized))))
 
 (defn split-ext [file-name] 
   (let [dot-at  (.lastIndexOf file-name ".")]
     [(.substring file-name 0 dot-at) (.substring file-name (inc dot-at))]))
 
-; use exif2 (uses libexif2) tool to parse exif (and maybe rename files too)
+; TODO use exif2 (uses libexif2) tool to parse exif (and maybe rename files too)
 ; We might make by-camera folders and use creation time from exif.
 (defn target-file [source-file target-root]
   (let [source-name (.getName source-file)
