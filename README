@@ -8,10 +8,6 @@ is rewrite of pcopy (https://github.com/PetrGlad/pcopy) in Clojure.
 
 ## Usage
 
-Not implemented yet.
-
-TODO: write
-
 clopy source-folder target-folder
 where
 * source-folder is where camera's memory card is mounted
